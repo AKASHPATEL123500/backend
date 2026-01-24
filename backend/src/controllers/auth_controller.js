@@ -30,11 +30,11 @@ export const signup = async (req , res)=>{
             })
         }
 
-        const findByEmail = await User.findOne({username})
+        const findByEmail = await User.findOne({email})
         if(findByEmail){
             return res.status(400).json({
                 success :  false,
-                message : "UserName Already exists"
+                message : "Email Already exists"
             })
         }
 
@@ -57,3 +57,77 @@ export const signup = async (req , res)=>{
         })
     }
 }
+
+
+
+
+
+export const signin = async (req, res) =>{
+    // req.body se data nikalna 
+    // finde karneg ki username mila ki nhai 
+    // password ko compare karn ahia 
+
+    try {
+
+        // req.body se data nikalna
+        const { username, password } = req.body
+
+        // finde karneg ki username mila ki nhai
+        const existingUser = await User.findOne({ username })
+        if (!existingUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        // password ko compare karn ahia
+        // model me method banaya hai isPasswordMatched
+        // jo ki password compare karega
+        const isCorrectPassword = await existingUser.isPasswordMatched(password)
+        if (!isCorrectPassword) {
+            return res.status(401).json({
+                success: false,
+                message: "Incorrect Password"
+            })
+        }
+        
+
+        // Acess toekn 
+        // Refresh token generate karna hai
+        const token = await existingUser.genrateAccessToken()
+        const refreshToken = await existingUser.generateRefreshToken()
+
+        // refresh token ko database me save karna hai
+        existingUser.refreshToken = refreshToken
+        await existingUser.save({validateBeforeSave : false})
+
+
+        // send token in http only cookie
+        const opstions = {
+            httpOnly : true,
+            secure : process.env.NODE_ENV === "production",
+            sameSite : "strict",
+            maxAge : 7 * 24 * 60 * 60 * 1000,
+        }
+        // 
+        return res
+            .status(200)
+            .cookie("refreshToken", refreshToken , opstions)
+            .json({
+                success : true,
+                message : "User Signed in Successfully",
+                accessToekn : token,
+                user : existingUser
+            })
+    } catch (error) {
+        console.log("Your Error is : ", error);
+        return res.status(500).json({
+            success : false,
+            message : error.message
+        })
+    }
+}
+
+
+
