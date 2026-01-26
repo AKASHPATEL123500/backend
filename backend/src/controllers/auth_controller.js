@@ -102,6 +102,10 @@ export const signin = async (req, res) =>{
         existingUser.refreshToken = refreshToken
         await existingUser.save({validateBeforeSave : false})
 
+        // Send user without password 
+        const userWithoutPassword = existingUser.toObject()
+        delete userWithoutPassword.password
+
 
         // send token in http only cookie
         const opstions = {
@@ -110,7 +114,7 @@ export const signin = async (req, res) =>{
             sameSite : "strict",
             maxAge : 7 * 24 * 60 * 60 * 1000,
         }
-        // 
+        // cookie set 
         return res
             .status(200)
             .cookie("refreshToken", refreshToken , opstions)
@@ -118,7 +122,7 @@ export const signin = async (req, res) =>{
                 success : true,
                 message : "User Signed in Successfully",
                 accessToekn : token,
-                user : existingUser
+                user : userWithoutPassword
             })
     } catch (error) {
         console.log("Your Error is : ", error);
@@ -130,4 +134,40 @@ export const signin = async (req, res) =>{
 }
 
 
+
+
+
+
+export const signout = async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $unset: { refreshToken: 1 }
+            }
+        )
+
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict"
+        }
+
+        return res
+            .status(200)
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
+            .json({
+                success: true,
+                message: "User Logged Out Successfully"
+            })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Logout Failed",
+            error: error.message
+        })
+    }
+}
 
