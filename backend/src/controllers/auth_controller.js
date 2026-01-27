@@ -123,7 +123,12 @@ export const signin = async (req, res) =>{
                 success : true,
                 message : "User Signed in Successfully",
                 accessToekn : token,
-                user : userWithoutPassword
+                user : {
+                    _id : existingUser._id,
+                    name : existingUser.name,
+                    username : existingUser.username,
+                    email : existingUser.email
+                }
             })
     } catch (error) {
         console.log("Your Error is : ", error);

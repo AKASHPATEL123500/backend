@@ -12,5 +12,4 @@ const myGurd = (req,res,next)=>{
         return res.status(401).json({message:"Ivaild Password"})
     } 
 }
-
 export default myGurd

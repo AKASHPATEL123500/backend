@@ -25,6 +25,58 @@ app.use("/api/v1/user/",userRouter)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+const datas = [
+    {
+        id: 1,
+        name : "Akash Patel",
+        username : "Akash_patel_01",
+        email : "akash@gmail.com",
+        password : "Akash@1234"
+    }
+]
+
+const password = process.env.SECRET_DATA_PASSWORD || "Akash@12345"
+
+// Headers se secret password check karna
+app.get("/secret",(req,res)=>{
+    const apikey = req.headers['x-secret-key']  // Headers se secret key lena
+    if(apikey === password){
+        return res.status(200).json({
+            success : true,
+            message : "Data retrieved successfully",
+            data : datas
+        })
+    }else{
+        return res.status(401).json({  // 401 = Unauthorized
+            success : false,
+            message : "Invalid Secret Password"
+        })
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
 // local database ke liye array banaya
 const data = []
 
