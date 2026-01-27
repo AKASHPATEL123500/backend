@@ -80,15 +80,13 @@ userSchema.methods.genrateAccessToken = async function(){
 }
 
 
-// Refresh token hum user ko new access token dene ke liye de rahe hai
+// Refresh Token Gen
 userSchema.methods.generateRefreshToken = async function(){
     return jwt.sign(
         {
             _id: this._id
-        }
-        ,
-        process.env.REFRESH_TOKEN_SECRET_KEY
-        ,
+        },
+            process.env.REFRESH_TOKEN_SECRET_KEY,
         {
             expiresIn : process.env.REFRESH_TOKEN_EXPIRY_KEY
         }

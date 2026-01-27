@@ -4,22 +4,30 @@ import User from "../models/user_model.js"
 export const getProfile = async (req,res)=>{
     try {
         const user = req.user
-        
+    
         if( !user ){
-            return res.status(404).json({
+            return res.status(401).json({
                 success : false,
-                message : "User Not found"
+                message : "Unauthorized Access"
             })
         }
+
         return res.status(200).json({
             success : true,
             message : "User Profile Get Successfully",
-            user:user
+            user:{
+                _id : user._id,
+                name : user.name,
+                username : user.username,
+                email : user.email,
+                createdAt : user.createdAt
+            }
         })
     } catch (error) {
         return res.status(500).json({
             success : false,
-            message : "Internal Server Error"
+            message : "Internal Server Error",
+            error : error.message
         })
     }
 }
@@ -30,13 +38,6 @@ export const suggestedUsers = async (req,res)=>{
         const currentUser = req.user._id
         console.log("Current user : ", req.user);
         
-        // if(!currentUser){
-        //     return res.status(404).json({
-        //         success : false,
-        //         message : "User Not found"
-        //     })
-        // }
-        
         const suggestedUser = await User.find({
             _id : {$ne : currentUser}
         })
@@ -44,7 +45,6 @@ export const suggestedUsers = async (req,res)=>{
         .limit(5)
 
         console.log("Suggested user : ",suggestedUser);
-        
 
         if(!suggestedUser){
             return res.status(404).json({

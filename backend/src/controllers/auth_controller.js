@@ -53,7 +53,8 @@ export const signup = async (req , res)=>{
     } catch (error) {
         return res.status(500).json({
             success : false,
-            message : "Internal Server Error"
+            message : "Internal Server Error",
+            erroe : error.message
         })
     }
 }
@@ -102,9 +103,9 @@ export const signin = async (req, res) =>{
         existingUser.refreshToken = refreshToken
         await existingUser.save({validateBeforeSave : false})
 
-        // Send user without password 
-        const userWithoutPassword = existingUser.toObject()
-        delete userWithoutPassword.password
+        // // Send user without password 
+        // const userWithoutPassword = existingUser.toObject()
+        // delete userWithoutPassword.password
 
 
         // send token in http only cookie
