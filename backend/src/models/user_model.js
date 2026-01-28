@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     password : {
         type : String,
         required : [true, "Password is required"],
-        trim : true
+        trim : true,
     }
 },{timestamps : true})
 
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
 // Password hashed using pre hooks of mongoose
 userSchema.pre("save",async function(){
     if(!this.isModified("password"))
-        return
+        return 
 
     // Genrate salt kar rahe hai 
     const genSalt = await bcrypt.genSalt(15)
@@ -44,6 +44,7 @@ userSchema.pre("save",async function(){
 // password ko compare karenge
 userSchema.methods.isPasswordMatched = async function(enterdPassword){
     return await bcrypt.compare(enterdPassword,this.password)
+    
 }
 
 
@@ -51,7 +52,7 @@ userSchema.methods.isPasswordMatched = async function(enterdPassword){
 // Token genrate
 
 // Access Token Genrate
-userSchema.methods.genrateAccessToekn = async function(){
+userSchema.methods.genrateAccessToken = async function(){
     return jwt.sign(
         {
             _id : this._id,
@@ -70,7 +71,7 @@ userSchema.methods.genrateAccessToekn = async function(){
 
 // Refresh token
 
-userSchema.methods.genrateRefreshToken = async function(){
+userSchema.methods.generateRefreshToken = async function(){
     return jwt.sign(
         {
             _id : this._id

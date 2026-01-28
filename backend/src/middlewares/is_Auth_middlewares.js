@@ -1,33 +1,43 @@
 import jwt from "jsonwebtoken"
 import User from "../models/user_model.js"
 
-export const verifyToekn = async (req,res,next)=>{
+export const verifyToken = async (req,res,next)=>{
     try {
-        const token = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer","")
-        if (!token) {
-            return res.status(401).json({
-                success: false,
-                message: "Access token missing"
-            })
+        // setp 1 token find from cookie or headers
+        const token = await req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ","")
+        if(!token){
+            return res.status(404).json(
+                {
+                    success : false,
+                    message : "Token Not found"
+                }
+            )
         }
-        const decodeToken = await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET_KEY)
+        
+        // setp2. token verify
+        const decode = await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET_KEY)
 
-        const user = await User.findById(decodeToken?._id).select("-password")
-
+        // setp 3. userfinde in database
+        const user = await User.findById(decode?._id).select("-password")
         if(!user){
-            return res.status(400).json({
-                success : false,
-                message : "Invaild Token User Not found"
-            })
+            return res.status(401).json(
+                {
+                    success : false,
+                    message : " Unauthroization User"
+                }
+            )
         }
 
         req.user = user
         next()
     } catch (error) {
-        console.log("JWT TOKEN VERIFY ERROR : ",error.message);
-        return res.status(500),json({
-            success : false,
-            message : "Internal Server Error"
-        })
+        console.log("verify token errror : ", error.message);
+        return res.status(500).json(
+            {
+                success : false,
+                message : "Internal Server Error",
+                error : error.message
+            }
+        )
     }
 }

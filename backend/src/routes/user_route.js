@@ -1,11 +1,10 @@
 import express from "express"
-import { verifyToekn } from "../middlewares/is_Auth_middlewares.js"
 import { getProfile, suggestedUsers } from "../controllers/user_controller.js"
-
+import { verifyToken } from "../middlewares/is_Auth_middlewares.js"
 const userRouter = express.Router()
 
 
-userRouter.get("/get-profile",verifyToekn,getProfile)
-userRouter.get("/suggested-user",verifyToekn,suggestedUsers)
+userRouter.get("/get-profile",verifyToken,getProfile)
+userRouter.get("/suggested-user",verifyToken,suggestedUsers)
 
 export default userRouter
