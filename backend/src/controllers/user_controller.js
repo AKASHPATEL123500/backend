@@ -73,3 +73,68 @@ export const suggestedUsers = async (req,res)=>{
         )
     }
 }
+
+
+
+
+export const updateProfile = async (req,res)=>{
+    try {
+        
+        const { name , username , email} = req.body
+
+        if(!name || !username || !email){
+            return res.status(400).json(
+                {
+                    success : false,
+                    message : "All fields are required"
+                }
+            )
+        }
+
+        const existingUser = await User.findOne(
+            {
+                $or : [{ email , username }],
+                _id : { $ne : req.user._id}
+            }
+        )
+
+        if(existingUser){
+            return res.status(400).json(
+                {
+                    success : false,
+                    message : "Username or Email Already in use"
+                }
+            )
+        }
+        
+        const updateUser = await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $set : {
+                    name : name ,
+                    username :username ,
+                    email : email 
+                }   
+            },
+            {
+                new : true  
+            }
+        ).select("-password")
+
+        return res.status(200).json(
+            {
+                success : true,
+                message : "Updated Successfully",
+                user : updateUser
+            }
+        )
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success : false,
+                message : "Internal Server Error",
+                error : error.message  || "Update profile error"
+            }
+        )
+    }
+}

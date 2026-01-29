@@ -4,7 +4,7 @@ import User from "../models/user_model.js"
 export const verifyToken = async (req,res,next)=>{
     try {
         // setp 1 token find from cookie or headers
-        const token = await req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ","")
+        const token = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ","")
         if(!token){
             return res.status(404).json(
                 {

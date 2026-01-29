@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import mongoose from 'mongoose';
+import rateLimt from "express-rate-limit"
 import authRoute from './routes/auth_route.js';
 import userRouter from './routes/user_route.js';
 import cookieParser from "cookie-parser"
@@ -34,7 +35,9 @@ app.use("/api/v1/user/",userRouter)
 
 
 
-
+app.get("/",(req,res)=>{
+    res.send("<h1>Hello world, This server is under maintaing </h1> ")
+})
 
 
 const datas = [
@@ -82,7 +85,7 @@ const data = []
 
 
 // Get- method define kar rahe hai data manage karna ke liye 
-app.get("/", (req, res) => {
+app.get("/bhhhhh", (req, res) => {
     // sirf specific fields send kar rahe hai, password nahi
     const specificUsersDetails = data.map((user) => ({
         id: user.id,
