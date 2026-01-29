@@ -25,9 +25,42 @@ const userSchema = new mongoose.Schema({
         required : [true, "Password is required"],
         trim : true,
     },
+    avatar:{
+        type : String, // cloudinary url ek string hota hai
+        required : true
+    },
+    coverImage:{
+        type: String,
+    },
     refreshToken:{
         type : String,
-    }
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
+
+    isSuspended: {
+        type: Boolean,
+        default: false
+    },
+
+    suspendUntil: {
+        type: Date,
+        default: null
+    },
+
+    role: {
+       type: String,
+       enum: ["user", "admin"],
+       default: "user"
+    },
+    
 },{timestamps : true})
 
 

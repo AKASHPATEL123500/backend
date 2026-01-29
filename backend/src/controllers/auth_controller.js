@@ -1,11 +1,11 @@
 import bcrypt from "bcryptjs"
 import User from "../models/user_model.js"
 import jwt from "jsonwebtoken"
+import uploadOnCloudinary from "../utils/cloudinary.js"
 
 export const signup = async (req,res)=>{
     try {
         const { name , username , email , password } = req.body
-
         // check all fields are filed or not
         if( !name || !username || !email || !password){
             return res.status(400).json(
@@ -15,8 +15,35 @@ export const signup = async (req,res)=>{
                 }
             )
         }
-        console.log("user password : ", password);
+
+        // cloudinary setup
+
+        // req.file se file path nikalo
+        const avatarLocalPath = req.files?.avatar?.[0]?.path
+
+        console.log("req.file : ",req.files);
         
+        if(!avatarLocalPath){
+            return res.status(400).json(
+                {
+                    success : false,
+                    message : "Avatar is Required "
+                }
+            )
+        }
+
+        // Ab us local path ko uploadOnCloudinary function mein bhejo.
+        //  Ye function tumhe ek object wapas dega jisme photo ka URL hoga.
+        const avatar = await uploadOnCloudinary(avatarLocalPath)
+        if(!avatar){
+            return res.status(400).json(
+                {
+                    success : false,
+                    message : " Upload On Cloudinary Error"
+                }
+            )
+        }
+
         // find by username 
         const findByUserName = await User.findOne({ username })
         if(findByUserName){
@@ -43,10 +70,11 @@ export const signup = async (req,res)=>{
         // user cretae
         const createUser = await User.create(
             {
-                name,
-                username,
-                email,
-                password
+                name : name,
+                username : username,
+                email : email,
+                password : password,
+                avatar : avatar.url
             }
         )
 
@@ -290,40 +318,54 @@ export const newRefreshToken = async ( req, res) => {
 }
 
 
-export const changeCurrentPassword = async (req, res) => {
+
+
+export const changeCurrentPassword = async ( req, res ) =>{
     try {
-        const { oldPassword, newPassword } = req.body;
 
-        // 1. User ko dhoondo ID se (Jo middleware ne req.user mein di thi)
-        // Humne password 'select: false' kiya tha schema mein, isliye yahan '+password' likhna padega
-        const user = await User.findById(req.user?._id).select("+password");
-
-        // 2. Check karo purana password sahi hai ya nahi
-        const isPasswordCorrect = await user.isPasswordMatched(oldPassword);
-
-        if (!isPasswordCorrect) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Old Password"
-            });
+        // req.body se data niklana hai
+        const { oldPassword , newPassword } = req.body
+        
+        // user ko find karo
+        const user = await User.findById(req.user._id).select("+password")
+        if(!user){
+            return res.status(401).json(
+                {
+                    success : false ,
+                    message : "Unauthtentice Request User Not found"
+                }
+            )
         }
 
-        // 3. Naya password set karo
-        user.password = newPassword;
+        // password ko check up karenge 
+        const isCorrectPassword = await user.isPasswordMatched(oldPassword)
+        if(!isCorrectPassword){
+            return res.status(400).json(
+                {
+                    success : false,
+                    message : "Old Password Not match"
+                }
+            )
+        }
 
-        // 4. Save karo (Isse tera pre-save hook chalega aur password hash ho jayega)
-        await user.save({ validateBeforeSave: false });
+        // database me save newPassword
+        user.password = newPassword
+        user.save({ validateBeforeSave : false})
 
-        return res.status(200).json({
-            success: true,
-            message: "Password changed successfully"
-        });
-
+        // sucess message retun
+        return res.status(200).json(
+            {
+                success : true,
+                message : "Password Changed Successfully"
+            }
+        )
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Error while changing password",
-            error: error.message
-        });
+        return res.status(500).json(
+            {
+                success : false,
+                message : "Internal Server Error",
+                error : error.message || " Password Chnage Error "
+            }
+        )
     }
-};
+}
