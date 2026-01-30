@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import crypto from "crypto"
 
 const userSchema = new mongoose.Schema({
     name :{
@@ -60,6 +61,12 @@ const userSchema = new mongoose.Schema({
        enum: ["user", "admin"],
        default: "user"
     },
+    forgotPasswordToken :{
+        type : String
+    },
+    forgotPasswordExpiry : {
+        type : Date
+    }
     
 },{timestamps : true})
 
@@ -70,7 +77,7 @@ userSchema.pre("save",async function(){
         return 
 
     // Genrate salt kar rahe hai 
-    const genSalt = await bcrypt.genSalt(15)
+    const genSalt = await bcrypt.genSalt(12)
 
     // password hash kar rahe hai
     this.password = await bcrypt.hash(this.password,genSalt)
@@ -118,6 +125,34 @@ userSchema.methods.generateRefreshToken = async function(){
         }
     )
 }
+
+
+
+
+
+
+// forget password token genrate karana hai using crypto
+userSchema.methods.generateForgotPasswordToken = async function (){
+    // 1. Ek random string generate karo
+    const resetToken = crypto.randomBytes(20).toString("hex")
+
+    // 2. Token ko hash karke DB mein save karo (Security ke liye)
+    this.forgotPasswordToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex")
+
+    // 3. Expiry set karo (15 minutes)
+    this.forgotPasswordExpiry = Date.now() + 15 * 60 * 1000;
+
+    // 4. Bina hash wala token wapas bhejo (Jo user ko email mein jayega)
+    return resetToken;
+}
+
+
+
+
+
 
 
 

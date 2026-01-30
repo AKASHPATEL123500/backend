@@ -2,12 +2,14 @@ import bcrypt from "bcryptjs"
 import User from "../models/user_model.js"
 import jwt from "jsonwebtoken"
 import uploadOnCloudinary from "../utils/cloudinary.js"
-
+import sendEmail from "../utils/node_mailer.js"
+import crypto from "crypto"
 
 
 export const signup = async (req,res)=>{
     try {
         const { name , username , email , password } = req.body
+
         // check all fields are filed or not
         if( !name || !username || !email || !password){
             return res.status(400).json(
@@ -90,7 +92,7 @@ export const signup = async (req,res)=>{
         return res.status(500).json(
             {
                 success : false,
-                message : "Internal Server Error",
+                message: "Internal Servre Error ", // Zod khud message dega
                 error : error.message
             }
         )
@@ -153,15 +155,7 @@ export const signin = async (req,res)=>{
                 success : true,
                 message : "SignIn Successfully",
                 accessToken : accessToken,
-                user : {
-                    _id : existingUser._id,
-                    name : existingUser.name,
-                    username : existingUser.username,
-                    email : existingUser.email,
-                    createdAt : existingUser.createdAt,
-                    updatedAt : existingUser.updatedAt,
-                    __v : existingUser.__v
-                }
+                user : existingUser
             }
         )
 
@@ -374,3 +368,107 @@ export const changeCurrentPassword = async ( req, res ) =>{
 
 
 
+
+
+
+
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // 1. Check user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // 2. Generate Token using our model method
+        const resetToken = await user.generateForgotPasswordToken();
+        await user.save({ validateBeforeSave: false }); // Bina validation ke save karo
+
+        // 3. Reset URL banao (Frontend ka path)
+        const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/password/reset/${resetToken}`;
+
+        // 4. Professional HTML Template
+        const htmlContent = `
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
+                <h2 style="color: #333;">Password Reset Request</h2>
+                <p>Bhai, tune password reset karne ki request bheji hai. Niche diye gaye button par click karke apna password badal le:</p>
+                <a href="${resetUrl}" style="background: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+                <p style="margin-top: 20px; color: #666;">Ye link sirf 15 minute ke liye valid hai.</p>
+                <p>Agar tune ye request nahi ki, toh is email ko ignore kar.</p>
+            </div>
+        `;
+
+        // 5. Send Email
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: "Password Reset - Akash Patel Backend",
+                message: `Click here to reset: ${resetUrl}`, // Fallback text
+                html: htmlContent // Tera stylish HTML
+            });
+
+            res.status(200).json({ success: true, message: `Email sent to ${user.email}` });
+
+        } catch (mailError) {
+            user.forgotPasswordToken = undefined;
+            user.forgotPasswordExpiry = undefined;
+            await user.save({ validateBeforeSave: false });
+            return res.status(500).json({ success: false, message: "Email could not be sent" });
+        }
+
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
+
+
+
+
+
+
+// auth_controller.js
+export const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params; // URL se token lo
+        const { password } = req.body; // User se naya password lo
+
+        // 1. Token ko hash karo taaki DB se match kar sakein
+        const hashedToken = crypto
+            .createHash('sha256')
+            .update(token)
+            .digest('hex');
+
+        // 2. User ko dhundo jiska token match ho aur expire na hua ho
+        const user = await User.findOne({
+            forgotPasswordToken: hashedToken,
+            forgotPasswordExpiry: { $gt: Date.now() } // $gt matlab Greater Than (abhi ke time se zyada)
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Token is invalid or has expired"
+            });
+        }
+
+        // 3. Naya password set karo
+        user.password = password;
+        user.forgotPasswordToken = undefined; // Token kaam khatam, delete kar do
+        user.forgotPasswordExpiry = undefined;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successfully! Ab login kar lo."
+        });
+
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
