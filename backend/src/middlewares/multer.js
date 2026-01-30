@@ -1,15 +1,17 @@
-
-import multer from "multer"
+import multer from "multer";
 
 const storage = multer.diskStorage(
     {
-        destination : function (req , file , cb){
-            cb(null, "./public/temp") // file kaha jayegi
-        },
-        filename : function(req,file,cb){
-            cb(null, file.originalname) // file ka orginal name se hi save hoga
-        }
+        // sabse pahle hum destination denge ki kaha file store karna hai 
+       destination : function (req , file , cb){
+        cb(null , "./public/temp")
+       },
+
+       // then hum file ka ek uique name de denge yaha per oringal name hi hai file ha
+       filename : function ( req , file , cb){
+        cb(null, file.originalname)
+       }
     }
 )
 
-export const upload = multer({storage}) 
+export const upload = multer({storage})

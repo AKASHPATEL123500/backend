@@ -3,6 +3,8 @@ import User from "../models/user_model.js"
 import jwt from "jsonwebtoken"
 import uploadOnCloudinary from "../utils/cloudinary.js"
 
+
+
 export const signup = async (req,res)=>{
     try {
         const { name , username , email , password } = req.body
@@ -17,10 +19,8 @@ export const signup = async (req,res)=>{
         }
 
         // cloudinary setup
-
         // req.file se file path nikalo
         const avatarLocalPath = req.files?.avatar?.[0]?.path
-
         console.log("req.file : ",req.files);
         
         if(!avatarLocalPath){
@@ -43,6 +43,7 @@ export const signup = async (req,res)=>{
                 }
             )
         }
+
 
         // find by username 
         const findByUserName = await User.findOne({ username })
@@ -369,3 +370,7 @@ export const changeCurrentPassword = async ( req, res ) =>{
         )
     }
 }
+
+
+
+

@@ -1,4 +1,5 @@
 import User from "../models/user_model.js"
+import uploadOnCloudinary from "../utils/cloudinary.js"
 
 
 export const getProfile = async (req,res)=>{
@@ -138,6 +139,66 @@ export const updateProfile = async ( req , res ) => {
                 success : false ,
                 message : "Internal Server Error",
                 error : error.message || " Updated Profile Error "
+            }
+        )
+    }
+}
+
+
+
+
+
+export const updateUserAvatar = async (req , res)=>{
+    try {
+        
+        // image ko nikalna hai req.file me se path ko
+        const avatarLocalPath = req.file.path
+        if(!avatarLocalPath){
+            return res.status(400).json(
+                {
+                    success : false,
+                    message : "Avatar is Missing"
+                }
+            )
+        }
+
+        // upload on cloudinary
+        const avatar = await uploadOnCloudinary(avatarLocalPath)
+        if(!avatar){
+            return res.status(400).json(
+                {
+                    success : false,
+                    message : "Error while uploading avatar"
+                }
+            )
+        }
+
+        // DB me user ko findbyidandupadet karna hai 
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $set : {
+                    avatar : avatar.url
+                }
+            },
+            {
+                new : true
+            }
+        ).select("-password")
+
+        return res.status(200).json(
+            {
+                success : true,
+                message : "Avatar Update successfully",
+                user : user
+            }
+        )
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success : false ,
+                message : "Internal Server Error",
+                error : error.message || " Updated User Avatar Error "
             }
         )
     }
