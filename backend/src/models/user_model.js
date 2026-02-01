@@ -1,50 +1,87 @@
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import crypto from "crypto"
 
 const userSchema = new mongoose.Schema({
+
     name :{
         type : String,
         required : [true , "Name is required"],
         trim : true
     },
+
+
     username:{
         type : String,
         unique : true,
         required : [true, "Username is required"],
         trim : true
     },
+
+
     email:{
         type : String,
         required : [true, "Email is required"],
         unique : true,
         trim : true
     },
+
+
     password : {
         type : String,
         required : [true, "Password is required"],
         trim : true,
     },
+
+
+    gender : {
+        type : String,
+        required : true,
+        enum : ["male","female","other"]
+    },
+
+
+    age : {
+        type : Number,
+        required : true
+    },
+
+
     avatar:{
         type : String, // cloudinary url ek string hota hai
         required : true
     },
+
+
     coverImage:{
         type: String,
     },
+
+
     refreshToken:{
         type : String,
     },
+
+
     isActive: {
         type: Boolean,
         default: true
     },
 
+
+    isVerified : {
+        type : Boolean,
+        default : true // sikhen ke pashe me true hai
+    },
+
+
+
     isBlocked: {
         type: Boolean,
         default: false
     },
+
 
     isSuspended: {
         type: Boolean,
@@ -61,12 +98,32 @@ const userSchema = new mongoose.Schema({
        enum: ["user", "admin"],
        default: "user"
     },
+
+
     forgotPasswordToken :{
         type : String
     },
+
+
     forgotPasswordExpiry : {
         type : Date
-    }
+    },
+
+
+    reels: [{
+    type: Schema.Types.ObjectId,
+    ref: "Reel"
+    }],
+
+  likedReels: [{
+    type: Schema.Types.ObjectId,
+    ref: "Reel"
+  }],
+
+  savedReels: [{
+    type: Schema.Types.ObjectId,
+    ref: "Reel"
+  }],
     
 },{timestamps : true})
 

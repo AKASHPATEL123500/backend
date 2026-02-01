@@ -8,17 +8,7 @@ import crypto from "crypto"
 
 export const signup = async (req,res)=>{
     try {
-        const { name , username , email , password } = req.body
-
-        // check all fields are filed or not
-        if( !name || !username || !email || !password){
-            return res.status(400).json(
-                {
-                    success : false,
-                    message : "All fileds are required"
-                }
-            )
-        }
+        const { name , username , age , gender , email , password } = req.body
 
         // cloudinary setup
         // req.file se file path nikalo
@@ -76,6 +66,8 @@ export const signup = async (req,res)=>{
                 name : name,
                 username : username,
                 email : email,
+                age : age,
+                gender : gender,
                 password : password,
                 avatar : avatar.url
             }
@@ -181,12 +173,7 @@ export const signout = async ( req , res)=>{
         await User.findByIdAndUpdate(
             req.user._id,
             {
-                $set : {
-                    refreshToken : undefined
-                }
-            },
-            {
-                new : true
+                $unset : {refreshToken : 1}
             }
         )
 

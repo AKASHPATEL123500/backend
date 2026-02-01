@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Maintenance</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body{
+            background: #000;
+            color: white;
+            font-family: 'Georgia', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 30px;
+            border: 3px solid white;
+            object-fit: cover;
+        }
+        
+        h1 {
+            font-size: 42px;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        h5{
+            margin-top: -5px;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        p{
+            font-family: serif;
+            font-size: 10px;
+            letter-spacing: 15px;
+            text-align: center;
+            margin-top: 20px;
+            
+            /* Gradient Effect */
+            background: linear-gradient(to right, #000, #fff, #fff, #000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 📱 Mobile Responsive */
+        @media (max-width: 768px) {
+            img {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+                letter-spacing: 1px;
+            }
+
+            h5 {
+                font-size: 14px;
+            }
+
+            p {
+                font-size: 8px;
+                letter-spacing: 8px;
+            }
+        }
+
+        /* 📱 Very Small Phones */
+        @media (max-width: 480px) {
+            img {
+                width: 100px;
+                height: 100px;
+            }
+
+            h1 {
+                font-size: 22px;
+                letter-spacing: 0px;
+            }
+
+            h5 {
+                font-size: 12px;
+            }
+
+            p {
+                font-size: 6px;
+                letter-spacing: 5px;
+                word-break: break-all;
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="akash.jpg" alt="Profile">
+    <h1>🔧 Server Under Maintenance</h1>
+    <h5>We'll be back soon!</h5>
+    <p>POWEREDBYAKASHREDDY01</p>
+</body>
+</html>

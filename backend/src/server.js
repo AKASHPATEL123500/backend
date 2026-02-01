@@ -5,6 +5,6 @@ const PORT = process.env.PORT || 13000
 
 app.listen(PORT,()=>{
     connectDB();
-    console.log(`Server is live on http:localhost:${PORT}`);
+    console.log(`Server is live on http://localhost:${PORT}`);
     
 })
