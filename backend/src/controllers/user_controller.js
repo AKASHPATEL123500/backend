@@ -133,7 +133,7 @@ export const updateProfile = async (req,res)=>{
 export const updateUserAvatar = async (req,res)=>{
     try {
 
-        const inComingAvatar = req.files.path
+        const inComingAvatar = req.file?.path
         if(!inComingAvatar){
             return res.status(400).json(
                 {

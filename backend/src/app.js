@@ -131,7 +131,7 @@ app.get("/",(req,res)=>{
     </style>
 </head>
 <body>
-    <img src="akash.jpg" alt="Profile">
+    <img src="http://res.cloudinary.com/dpkiuaogo/image/upload/v1769958700/pbfpbojumycopjw4qhpg.jpg" alt="Profile">
     <h1>🔧 Server Under Maintenance</h1>
     <h5>We'll be back soon!</h5>
     <p>POWEREDBYAKASHREDDY01</p>
